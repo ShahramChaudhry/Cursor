@@ -16,6 +16,7 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import SubscriptionModel from './pages/SubscriptionModel';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Import context providers
@@ -109,10 +110,11 @@ function App() {
             <CssBaseline />
             <Box sx={{ display: 'flex', minHeight: '100vh' }}>
               <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                    {/* Public routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/pricing" element={<SubscriptionModel />} />
                 
                 {/* Protected routes */}
                 <Route path="/app" element={

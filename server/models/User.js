@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,41 +23,14 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
-  phone: {
-    type: String,
-    trim: true
-  },
-  avatar: {
-    type: String,
-    default: ''
-  },
-  role: {
-    type: String,
-    enum: ['user', 'premium', 'admin'],
-    default: 'user'
-  },
-  subscription: {
-    plan: {
-      type: String,
-      enum: ['free', 'premium', 'family'],
-      default: 'free'
-    },
-    startDate: Date,
-    endDate: Date,
-    autoRenew: {
-      type: Boolean,
-      default: true
-    }
-  },
   preferences: {
-    language: {
-      type: String,
-      enum: ['en', 'ar'],
-      default: 'en'
-    },
     currency: {
       type: String,
       default: 'AED'
+    },
+    language: {
+      type: String,
+      default: 'en'
     },
     notifications: {
       email: {
@@ -68,66 +40,23 @@ const userSchema = new mongoose.Schema({
       push: {
         type: Boolean,
         default: true
-      },
-      reminders: {
-        type: Boolean,
-        default: true
       }
-    },
-    timezone: {
-      type: String,
-      default: 'Asia/Dubai'
     }
   },
-  bankAccounts: [{
-    bankName: String,
-    accountNumber: String,
-    accountType: String,
-    isActive: {
-      type: Boolean,
-      default: true
+  subscription: {
+    plan: {
+      type: String,
+      enum: ['free', 'pro'],
+      default: 'free'
     },
-    lastSync: Date
-  }],
-  emailAccounts: [{
-    email: String,
-    provider: String,
-    isActive: {
-      type: Boolean,
-      default: true
+    startDate: {
+      type: Date,
+      default: Date.now
     },
-    lastSync: Date,
-    accessToken: String
-  }],
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  emailVerificationToken: String,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  lastLogin: Date,
-  isActive: {
-    type: Boolean,
-    default: true
+    endDate: Date
   }
 }, {
   timestamps: true
 });
-
-// Encrypt password using bcrypt
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-
-  const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS) || 12);
-  this.password = await bcrypt.hash(this.password, salt);
-});
-
-// Match user entered password to hashed password in database
-userSchema.methods.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
 
 module.exports = mongoose.model('User', userSchema);

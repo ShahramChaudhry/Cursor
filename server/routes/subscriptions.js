@@ -1,11 +1,14 @@
 const express = require('express');
-const { getSubscriptions, createSubscription, getAnalytics } = require('../controllers/subscriptions');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All routes are public for demo
-router.get('/', getSubscriptions);
-router.post('/', createSubscription);
-router.get('/analytics', getAnalytics);
+// All subscription routes are protected
+router.use(protect);
+
+// Placeholder routes
+router.get('/', (req, res) => {
+  res.json({ message: 'Subscriptions route' });
+});
 
 module.exports = router;

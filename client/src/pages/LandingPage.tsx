@@ -186,7 +186,7 @@ const LandingPage: React.FC = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: { xs: '2.5rem', md: '3.5rem' },
+                  fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.5rem', lg: '4rem' },
                   lineHeight: 1.2
                 }}
               >
@@ -198,7 +198,7 @@ const LandingPage: React.FC = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 300,
-                  fontSize: { xs: '1.5rem', md: '2rem' },
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '2rem' },
                   mb: 3
                 }}
               >
@@ -254,6 +254,26 @@ const LandingPage: React.FC = () => {
                   }}
                 >
                   {language === 'ar' ? 'ابدأ مجاناً' : 'Start Free'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate('/pricing')}
+                  sx={{
+                    borderColor: '#3B82F6',
+                    color: '#3B82F6',
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    '&:hover': {
+                      borderColor: '#2563EB',
+                      backgroundColor: 'rgba(37, 99, 235, 0.2)'
+                    }
+                  }}
+                >
+                  {language === 'ar' ? 'خطط الأسعار' : 'View Pricing'}
                 </Button>
               </Box>
             </Grid>

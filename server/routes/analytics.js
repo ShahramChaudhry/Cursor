@@ -1,8 +1,10 @@
 const express = require('express');
-const { getAnalytics } = require('../controllers/analytics');
 
 const router = express.Router();
 
-router.get('/', getAnalytics);
+// Placeholder routes
+router.get('/', (req, res) => {
+  res.json({ message: 'Analytics route' });
+});
 
 module.exports = router;

@@ -1,49 +1,119 @@
-// Demo controllers for سبLess
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const generateToken = require('../utils/generateToken');
 
-// Auth controller
+// @desc    Register user
+// @route   POST /auth/register
+// @access  Public
 const register = async (req, res) => {
-  res.status(201).json({
-    success: true,
-    token: 'demo-token',
-    user: {
-      id: 'demo-user',
-      name: req.body.name,
-      email: req.body.email,
-      role: 'user'
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
+      });
     }
-  });
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    if (user) {
+      const token = generateToken(user._id);
+      res.status(201).json({
+        success: true,
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid user data'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
 };
 
+// @desc    Login user
+// @route   POST /auth/login
+// @access  Public
 const login = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    token: 'demo-token',
-    user: {
-      id: 'demo-user',
-      name: 'Demo User',
-      email: req.body.email,
-      role: 'user'
+  try {
+    const { email, password } = req.body;
+
+    // Check for user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
     }
-  });
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    const token = generateToken(user._id);
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
 };
 
-const logout = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Logged out successfully'
-  });
-};
-
-const getMe = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    user: {
-      id: 'demo-user',
-      name: 'Demo User',
-      email: 'demo@example.com',
-      role: 'user'
-    }
-  });
+// @desc    Get user profile
+// @route   GET /auth/profile
+// @access  Private
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
 };
 
 // Subscriptions controller
@@ -51,53 +121,76 @@ const getSubscriptions = async (req, res) => {
   const demoSubscriptions = [
     {
       id: '1',
-      name: 'Netflix Premium',
-      provider: 'Netflix',
-      amount: 55,
+      name: 'Du Mobile',
+      provider: 'Du',
+      amount: 175,
       currency: 'AED',
-      nextBillingDate: '2024-01-15',
+      nextBillingDate: '2024-11-01',
       status: 'active',
-      category: 'streaming'
+      category: 'utilities',
+      icon: 'D',
+      iconColor: '#FF6B35'
     },
     {
       id: '2',
-      name: 'Spotify Premium',
-      provider: 'Spotify',
-      amount: 25,
+      name: 'Netflix',
+      provider: 'Netflix',
+      amount: 39,
       currency: 'AED',
-      nextBillingDate: '2024-01-20',
+      nextBillingDate: '2024-11-05',
       status: 'active',
-      category: 'music'
+      category: 'entertainment',
+      icon: 'N',
+      iconColor: '#E50914'
     },
     {
       id: '3',
-      name: 'Adobe Creative Cloud',
-      provider: 'Adobe',
-      amount: 120,
+      name: 'Starzplay',
+      provider: 'Starzplay',
+      amount: 19,
       currency: 'AED',
-      nextBillingDate: '2024-01-25',
+      nextBillingDate: '2024-11-08',
       status: 'active',
-      category: 'software'
+      category: 'entertainment',
+      icon: 'S',
+      iconColor: '#000000'
     },
     {
       id: '4',
-      name: 'Etisalat Mobile',
-      provider: 'Etisalat',
-      amount: 150,
+      name: 'Spotify',
+      provider: 'Spotify',
+      amount: 29,
       currency: 'AED',
-      nextBillingDate: '2024-01-10',
+      nextBillingDate: '2024-11-12',
       status: 'active',
-      category: 'telecom'
+      category: 'music',
+      icon: 'S',
+      iconColor: '#1DB954'
     },
     {
       id: '5',
-      name: 'Starzplay',
-      provider: 'Starzplay',
-      amount: 35,
+      name: 'Adobe Creative Cloud',
+      provider: 'Adobe',
+      amount: 149,
       currency: 'AED',
-      nextBillingDate: '2024-01-18',
+      nextBillingDate: '2024-11-15',
+      status: 'active',
+      category: 'software',
+      icon: 'A',
+      iconColor: '#FF0000'
+    },
+    {
+      id: '6',
+      name: 'YouTube Premium',
+      provider: 'YouTube',
+      amount: 25,
+      currency: 'AED',
+      nextBillingDate: '2024-11-20',
       status: 'trial',
-      category: 'streaming'
+      category: 'entertainment',
+      icon: 'Y',
+      iconColor: '#FF0000',
+      trialEndsIn: 3
     }
   ];
 
@@ -108,31 +201,25 @@ const getSubscriptions = async (req, res) => {
   });
 };
 
-const createSubscription = async (req, res) => {
-  res.status(201).json({
-    success: true,
-    data: {
-      id: Date.now().toString(),
-      ...req.body,
-      status: 'active'
-    }
-  });
-};
-
 const getAnalytics = async (req, res) => {
   res.status(200).json({
     success: true,
     data: {
-      totalSubscriptions: 12,
-      activeSubscriptions: 10,
-      totalMonthlyCost: 450,
-      totalYearlyCost: 5400,
+      totalSubscriptions: 6,
+      activeSubscriptions: 5,
+      totalMonthlyCost: 411,
+      totalYearlyCost: 4932,
       categoryBreakdown: {
-        streaming: { count: 3, amount: 90 },
-        music: { count: 1, amount: 25 },
-        software: { count: 1, amount: 120 },
-        telecom: { count: 1, amount: 150 }
-      }
+        utilities: { count: 1, amount: 175 },
+        entertainment: { count: 3, amount: 83 },
+        music: { count: 1, amount: 29 },
+        software: { count: 1, amount: 149 }
+      },
+      upcomingPayments: [
+        { name: 'Du Mobile', date: '1 Nov', amount: 175 },
+        { name: 'Netflix', date: '5 Nov', amount: 39 },
+        { name: 'Starzplay', date: '8 Nov', amount: 19 }
+      ]
     }
   });
 };
@@ -140,9 +227,7 @@ const getAnalytics = async (req, res) => {
 module.exports = {
   register,
   login,
-  logout,
-  getMe,
+  getProfile,
   getSubscriptions,
-  createSubscription,
   getAnalytics
 };

@@ -5,133 +5,177 @@ import {
   Typography,
   IconButton,
   Box,
-  Avatar,
+  Button,
   Menu,
   MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Switch,
-  FormControlLabel
+  Avatar,
+  Chip
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  AccountCircle,
+  Notifications,
   Settings,
-  Logout,
-  Language
+  Language,
+  AccountCircle,
+  Logout
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { language, changeLanguage } = useLanguage();
   const { t } = useTranslation();
+  const { language, changeLanguage } = useLanguage();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
   const handleLogout = () => {
-    logout();
-    handleClose();
-  };
-
-  const handleLanguageChange = () => {
-    const newLang = language === 'en' ? 'ar' : 'en';
-    changeLanguage(newLang);
-    handleClose();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
   };
 
   return (
-    <AppBar position="static" elevation={1}>
-      <Toolbar>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
-        
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          {t('app.title')} - {t('app.tagline')}
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
+    <AppBar 
+      position="static" 
+      sx={{ 
+        backgroundColor: '#1E293B',
+        borderBottom: '1px solid #334155',
+        boxShadow: 'none'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* Logo */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontSize: { xs: '1rem', md: '1.25rem' }
+            }}
           >
-            {user?.avatar ? (
-              <Avatar src={user.avatar} sx={{ width: 32, height: 32 }} />
-            ) : (
-              <AccountCircle />
-            )}
+            سبLess
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            ml: 1, 
+            color: '#94A3B8',
+            display: { xs: 'none', sm: 'block' },
+            fontSize: { xs: '0.75rem', md: '0.875rem' }
+          }}>
+            Because Less is More
+          </Typography>
+        </Box>
+
+        {/* Navigation Links */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+          <Button 
+            color="inherit" 
+            sx={{ 
+              color: 'white',
+              fontWeight: 'medium',
+              textDecoration: 'underline',
+              textUnderlineOffset: 4
+            }}
+          >
+            Overview
+          </Button>
+          <Button color="inherit" sx={{ color: '#94A3B8' }}>
+            Subscriptions
+          </Button>
+          <Button color="inherit" sx={{ color: '#94A3B8' }}>
+            Analytics
+          </Button>
+          <Button color="inherit" sx={{ color: '#94A3B8' }}>
+            Household
+          </Button>
+        </Box>
+
+        {/* Right side icons */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 1 } }}>
+          <IconButton color="inherit" sx={{ 
+            color: '#94A3B8',
+            padding: { xs: '4px', md: '8px' }
+          }}>
+            <Notifications sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />
+          </IconButton>
+          <IconButton color="inherit" sx={{ 
+            color: '#94A3B8',
+            padding: { xs: '4px', md: '8px' }
+          }}>
+            <Settings sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />
+          </IconButton>
+          
+          {/* Language Toggle */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: { xs: 0.5, md: 1 },
+            ml: { xs: 0.5, md: 1 }
+          }}>
+            <Language sx={{ 
+              color: '#94A3B8', 
+              fontSize: { xs: '1rem', md: '1.25rem' },
+              display: { xs: 'none', sm: 'block' }
+            }} />
+            <Chip
+              label={language === 'ar' ? 'AR' : 'EN'}
+              size="small"
+              onClick={() => changeLanguage(language === 'ar' ? 'en' : 'ar')}
+              sx={{
+                backgroundColor: '#334155',
+                color: 'white',
+                fontSize: { xs: '0.625rem', md: '0.75rem' },
+                height: { xs: 24, md: 28 },
+                '&:hover': {
+                  backgroundColor: '#475569'
+                }
+              }}
+            />
+          </Box>
+
+          {/* User Menu */}
+          <IconButton
+            onClick={handleMenuOpen}
+            sx={{ 
+              color: '#94A3B8',
+              padding: { xs: '4px', md: '8px' }
+            }}
+          >
+            <AccountCircle sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />
           </IconButton>
           
           <Menu
-            id="menu-appbar"
             anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
             open={Boolean(anchorEl)}
-            onClose={handleClose}
+            onClose={handleMenuClose}
+            sx={{
+              '& .MuiPaper-root': {
+                backgroundColor: '#1E293B',
+                border: '1px solid #334155',
+                color: 'white'
+              }
+            }}
           >
-            <MenuItem disabled>
-              <ListItemText>
-                <Typography variant="subtitle2">{user?.name}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {user?.email}
-                </Typography>
-              </ListItemText>
+            <MenuItem onClick={handleMenuClose}>
+              <AccountCircle sx={{ mr: 1 }} />
+              Profile
             </MenuItem>
-            
-            <Divider />
-            
-            <MenuItem onClick={handleLanguageChange}>
-              <ListItemIcon>
-                <Language fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>
-                {language === 'en' ? 'العربية' : 'English'}
-              </ListItemText>
+            <MenuItem onClick={handleMenuClose}>
+              <Settings sx={{ mr: 1 }} />
+              Settings
             </MenuItem>
-            
-            <MenuItem onClick={handleClose}>
-              <ListItemIcon>
-                <Settings fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>{t('navigation.settings')}</ListItemText>
-            </MenuItem>
-            
-            <Divider />
-            
             <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <Logout fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>{t('navigation.logout')}</ListItemText>
+              <Logout sx={{ mr: 1 }} />
+              Logout
             </MenuItem>
           </Menu>
         </Box>
